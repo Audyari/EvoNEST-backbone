@@ -435,6 +435,21 @@ export default function NonLinearFibreBundleAnalysis() {
         reader.onload = (e) => {
             setImportData(e.target.result);
         };
+        reader.onerror = () => console.error("Error reading file");
+
+        // Cleanup function to abort FileReader when component unmounts
+        // This prevents memory leaks by ensuring the FileReader is properly aborted
+        // if the component unmounts before the file reading operation completes
+        const cleanup = () => {
+            if (reader.readyState !== FileReader.DONE) {
+                reader.abort();
+            }
+        };
+
+        // Add cleanup to component unmount
+        const currentCleanup = window.fileReaderCleanup;
+        window.fileReaderCleanup = cleanup;
+        if (currentCleanup) currentCleanup();
 
         if (file.name.endsWith('.csv')) {
             setImportType("csv");
@@ -446,6 +461,7 @@ export default function NonLinearFibreBundleAnalysis() {
             alert("Please upload a CSV or JSON file.");
         }
     };
+
 
     /* -------------------------------------------------------------------------- */
     /*                                  Mechanics                                 */

@@ -60,3 +60,9 @@ downloaded_backups/*.tar.gz
 docs/node_modules/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+
+# OpenSpec
+.openspec/
+openspec/
+AGENTS.md
+.agent/

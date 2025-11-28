@@ -43,10 +43,10 @@ const SPECIAL_MAPPINGS = {
         parser: (value) => {
             if (!value || typeof value !== 'string') return {};
             const trimmed = value.trim();
-            
+
             // Remove common prefixes/suffixes that might interfere
             const cleaned = trimmed.replace(/^(cf\.|aff\.|sp\.|spp\.)?\s*/i, '').trim();
-            
+
             const parts = cleaned.split(/\s+/);
             if (parts.length >= 2) {
                 return {
@@ -109,64 +109,64 @@ const SPECIAL_MAPPINGS = {
         targetFields: ['responsible'],
         parser: (value, users) => {
             if (!value) return { responsible: '' };
-            
+
             const trimmed = value.trim();
-            
+
             // If users data is not available, return the original value
             if (!users || !Array.isArray(users)) {
                 return { responsible: trimmed };
             }
-            
+
             // Try to find user by exact name match first
             let user = users.find(u => u.name === trimmed);
-            
+
             // If not found by name, try by email
             if (!user) {
                 user = users.find(u => u.email === trimmed);
             }
-            
+
             // If not found, try by _id (in case it's already an ID)
             if (!user) {
                 user = users.find(u => u._id === trimmed);
             }
-            
+
             // If still not found, try partial matches for name (case insensitive)
             if (!user) {
-                user = users.find(u => 
+                user = users.find(u =>
                     u.name && u.name.toLowerCase().includes(trimmed.toLowerCase())
                 );
             }
-            
+
             return {
                 responsible: user ? user._id : trimmed // Return user ID if found, otherwise original value
             };
         },
         validate: (value, users) => {
             if (!value) return { valid: true };
-            
+
             const trimmed = value.trim();
             if (trimmed.length === 0) return { valid: false, error: 'Responsible cannot be empty' };
-            
+
             // If users data is not available, we can't validate but don't block
             if (!users || !Array.isArray(users)) {
                 return { valid: true }; // Allow import to proceed
             }
-            
+
             // Check if user exists by name, email, or ID
-            const user = users.find(u => 
-                u.name === trimmed || 
+            const user = users.find(u =>
+                u.name === trimmed ||
                 u.email === trimmed ||
                 u._id === trimmed ||
                 (u.name && u.name.toLowerCase().includes(trimmed.toLowerCase()))
             );
-            
+
             if (!user) {
-                return { 
-                    valid: false, 
-                    error: `User "${trimmed}" not found. Please check name, email, or user ID.` 
+                return {
+                    valid: false,
+                    error: `User "${trimmed}" not found. Please check name, email, or user ID.`
                 };
             }
-            
+
             return { valid: true };
         }
     },
@@ -254,10 +254,10 @@ const ImportPage = () => {
     useEffect(() => {
         if (data.length > 0) {
             // Check if hierarchical import is being used
-            const hasHierarchicalMappings = Object.values(specialMappings).some(mapping => 
+            const hasHierarchicalMappings = Object.values(specialMappings).some(mapping =>
                 SPECIAL_MAPPINGS[mapping]?.isHierarchical
             );
-            
+
             if (hasHierarchicalMappings) {
                 setIsHierarchicalImport(true);
                 processHierarchicalData(data, fieldMappings, specialMappings);
@@ -265,7 +265,7 @@ const ImportPage = () => {
                 setIsHierarchicalImport(false);
                 setHierarchicalData({ animals: [], subsamples: [] });
             }
-            
+
             const errors = validateData(data, fieldMappings, specialMappings);
             setValidationErrors(errors);
         }
@@ -287,10 +287,10 @@ const ImportPage = () => {
 
         // Check for nomenclature-like patterns in field names
         const nomenclatureKeywords = ['nomenclature', 'scientific_name', 'scientific name', 'binomial', 'taxon', 'name', "determination"];
-        const nomenclatureMatch = nomenclatureKeywords.some(keyword => 
+        const nomenclatureMatch = nomenclatureKeywords.some(keyword =>
             csvField.toLowerCase().includes(keyword.toLowerCase())
         );
-        
+
         if (nomenclatureMatch) {
             specialMatches.push({
                 field: 'nomenclature',
@@ -302,10 +302,10 @@ const ImportPage = () => {
 
         // Check for responsible-like patterns in field names
         const responsibleKeywords = ['responsible', 'person', 'researcher', 'collector', 'author', 'user'];
-        const responsibleMatch = responsibleKeywords.some(keyword => 
+        const responsibleMatch = responsibleKeywords.some(keyword =>
             csvField.toLowerCase().includes(keyword.toLowerCase())
         );
-        
+
         if (responsibleMatch) {
             specialMatches.push({
                 field: 'responsible',
@@ -334,32 +334,32 @@ const ImportPage = () => {
     const processHierarchicalData = (records, currentMappings, currentSpecialMappings) => {
         let animalIdField = null;
         let subsampleIdField = null;
-        
+
         // Find which fields are mapped to animal_id and subsample_id
         Object.entries(currentSpecialMappings).forEach(([csvField, specialType]) => {
             if (specialType === 'animal_id') animalIdField = csvField;
             if (specialType === 'subsample_id') subsampleIdField = csvField;
         });
-        
+
         if (!animalIdField || !subsampleIdField) {
             setHierarchicalData({ animals: [], subsamples: [] });
             return;
         }
-        
+
         // Group records by animal ID and take first occurrence for animal data
         const animalGroups = {};
         const subsampleRecords = [];
-        
+
         records.forEach(record => {
             const animalId = record[animalIdField];
             const subsampleId = record[subsampleIdField];
-            
+
             if (animalId && subsampleId) {
                 // Store first occurrence of each animal
                 if (!animalGroups[animalId]) {
                     animalGroups[animalId] = { ...record };
                 }
-                
+
                 // All records are potential subsamples
                 subsampleRecords.push({
                     ...record,
@@ -368,7 +368,7 @@ const ImportPage = () => {
                 });
             }
         });
-        
+
         setHierarchicalData({
             animals: Object.values(animalGroups),
             subsamples: subsampleRecords
@@ -456,9 +456,9 @@ const ImportPage = () => {
                                     </div>
                                 </SelectItem>
                             ))}
-                            
+
                             <Separator className="my-2" />
-                            
+
                             {/* Special Mappings Section */}
                             {Object.entries(SPECIAL_MAPPINGS).map(([key, config]) => (
                                 <SelectItem
@@ -484,7 +484,7 @@ const ImportPage = () => {
                                     </div>
                                 </SelectItem>
                             ))}
-                            
+
                             <Separator className="my-2" />
                             {/* Custom Field Option */}
                             <SelectItem value="custom" className="flex items-center">
@@ -586,12 +586,29 @@ const ImportPage = () => {
                 setIsLoading(false);
             };
 
+            reader.onerror = () => console.error("Error reading file");
+
+            // Cleanup function to abort FileReader when component unmounts
+            // This prevents memory leaks by ensuring the FileReader is properly aborted
+            // if the component unmounts before the file reading operation completes
+            const cleanup = () => {
+                if (reader.readyState !== FileReader.DONE) {
+                    reader.abort();
+                }
+            };
+
+            // Add cleanup to component unmount
+            const currentCleanup = window.fileReaderCleanup;
+            window.fileReaderCleanup = cleanup;
+            if (currentCleanup) currentCleanup();
+
             reader.readAsText(file);
         } catch (error) {
             setValidationErrors([`File processing error: ${error.message}`]);
             setIsLoading(false);
         }
     };
+
 
     // Modified validateData to accept current mappings and special mappings
     const validateData = (records, currentMappings, currentSpecialMappings = {}) => {
@@ -600,7 +617,7 @@ const ImportPage = () => {
 
         // Get all fields that will be populated (regular + special mappings)
         const mappedFields = new Set(Object.values(currentMappings));
-        
+
         // Add fields from special mappings - this is key to making special mappings
         // satisfy required field requirements (e.g., nomenclature satisfies genus + species)
         Object.entries(currentSpecialMappings).forEach(([source, specialType]) => {
@@ -643,7 +660,7 @@ const ImportPage = () => {
                 const specialConfig = SPECIAL_MAPPINGS[specialType];
                 if (specialConfig) {
                     const value = record[sourceField];
-                    
+
                     // Validate the format if a validation function exists
                     if (specialConfig.validate) {
                         const validation = specialConfig.validate(value, usersData);
@@ -652,14 +669,14 @@ const ImportPage = () => {
                             cellErrorMap[`${rowIndex}-${sourceField}`] = validation.error;
                         }
                     }
-                    
+
                     // Parse the value using the special config
                     const parsedFields = specialConfig.parser(value, usersData);
-                    
+
                     // Validate each target field
                     specialConfig.targetFields.forEach(targetField => {
                         const parsedValue = parsedFields[targetField];
-                        
+
                         // Required field validation
                         if (REQUIRED_FIELDS.includes(targetField) && !parsedValue) {
                             errors.push(`Row ${rowIndex + 1}: Missing required field ${targetField} from ${specialConfig.label}`);
@@ -725,30 +742,30 @@ const ImportPage = () => {
     // Handle hierarchical import (animals first, then subsamples)
     const handleHierarchicalImport = async () => {
         const animalIdMapping = {};
-        
+
         // Phase 1: Import animals
         setImportStatus('Phase 1: Importing animals...');
         for (let i = 0; i < hierarchicalData.animals.length; i++) {
             const animalRecord = hierarchicalData.animals[i];
             setImportProgress((i / (hierarchicalData.animals.length + hierarchicalData.subsamples.length)) * 50);
-            
+
             const transformedAnimal = transformRecord(animalRecord, true); // true = isAnimal
-            
+
             // Check if animal already exists
             const existingAnimal = await checkAnimalExists(transformedAnimal.name);
-            
+
             if (existingAnimal) {
                 // Animal exists, use existing ID
                 animalIdMapping[transformedAnimal.name] = existingAnimal._id;
                 setImportStatus(`Animal "${transformedAnimal.name}" already exists, using existing record`);
             } else {
                 // Create new animal - ensure type is set to "animal"
-                const animalData = { 
-                    ...transformedAnimal, 
+                const animalData = {
+                    ...transformedAnimal,
                     type: 'animal',  // Override any type from CSV data
-                    method: 'create' 
+                    method: 'create'
                 };
-                
+
                 const response = await fetch('/api/samples', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -770,9 +787,9 @@ const ImportPage = () => {
         for (let i = 0; i < hierarchicalData.subsamples.length; i++) {
             const subsampleRecord = hierarchicalData.subsamples[i];
             setImportProgress(50 + ((i / hierarchicalData.subsamples.length) * 50));
-            
+
             const transformedSubsample = transformRecord(subsampleRecord, false); // false = isSubsample
-            
+
             // Set parent ID from animal mapping
             const animalId = subsampleRecord._animalId;
             if (animalIdMapping[animalId]) {
@@ -847,27 +864,27 @@ const ImportPage = () => {
     // Transform a record according to field mappings
     const transformRecord = (record, isAnimal = null) => {
         const transformed = {};
-        
+
         // Process regular field mappings
         Object.entries(fieldMappings).forEach(([source, target]) => {
             if (target) {
                 transformed[target] = record[source];
             }
         });
-        
+
         // Process special mappings
         Object.entries(specialMappings).forEach(([source, specialType]) => {
             const specialConfig = SPECIAL_MAPPINGS[specialType];
             if (specialConfig) {
                 const value = record[source];
                 const parsedFields = specialConfig.parser(value, usersData);
-                
+
                 // For hierarchical imports, only apply relevant mappings
                 if (isHierarchicalImport) {
                     if (isAnimal && specialConfig.level === 'child') return; // Skip child mappings for animals
                     if (isAnimal === false && specialConfig.level === 'parent') return; // Skip parent mappings for subsamples
                 }
-                
+
                 // Add parsed fields to transformed data
                 Object.entries(parsedFields).forEach(([fieldName, fieldValue]) => {
                     if (fieldValue) { // Only add non-empty values
@@ -876,7 +893,7 @@ const ImportPage = () => {
                 });
             }
         });
-        
+
         // Keep original ID for reference
         transformed.originalId = record.id || record._id;
         return transformed;
@@ -895,7 +912,7 @@ const ImportPage = () => {
                     type: 'animal'
                 })
             });
-            
+
             if (response.status === 404) {
                 return null; // Animal not found
             }
@@ -903,7 +920,7 @@ const ImportPage = () => {
                 console.error('Error checking animal existence:', response.status, response.statusText);
                 return null;
             }
-            
+
             const sample = await response.json();
             return sample; // Return the matching animal
         } catch (error) {
@@ -950,37 +967,37 @@ const ImportPage = () => {
                                         </AlertDescription>
                                     </Alert>
                                 )}
-                                
-                                <div className="flex flex-wrap gap-2">
-                                {/* Regular mappings */}
-                                {Object.entries(fieldMappings).map(([source, target]) => (
-                                    target && (
-                                        <Badge key={source} variant="secondary" className="flex items-center gap-2">
-                                            {source} → {target}
-                                            <X
-                                                className="w-3 h-3 cursor-pointer"
-                                                onClick={() => {
-                                                    setFieldMappings(prev => {
-                                                        const { [source]: _, ...rest } = prev;
-                                                        return rest;
-                                                    });
-                                                    // Re-validate after removal
-                                                    setTimeout(() => {
-                                                        if (data.length > 0) {
-                                                            const newMappings = { ...fieldMappings };
-                                                            delete newMappings[source];
-                                                            const errors = validateData(data, newMappings, specialMappings);
-                                                            setValidationErrors(errors);
-                                                        }
-                                                    }, 0);
-                                                }}
-                                            />
-                                        </Badge>
-                                    )
-                                ))}
-                            </div>
 
-                                
+                                <div className="flex flex-wrap gap-2">
+                                    {/* Regular mappings */}
+                                    {Object.entries(fieldMappings).map(([source, target]) => (
+                                        target && (
+                                            <Badge key={source} variant="secondary" className="flex items-center gap-2">
+                                                {source} → {target}
+                                                <X
+                                                    className="w-3 h-3 cursor-pointer"
+                                                    onClick={() => {
+                                                        setFieldMappings(prev => {
+                                                            const { [source]: _, ...rest } = prev;
+                                                            return rest;
+                                                        });
+                                                        // Re-validate after removal
+                                                        setTimeout(() => {
+                                                            if (data.length > 0) {
+                                                                const newMappings = { ...fieldMappings };
+                                                                delete newMappings[source];
+                                                                const errors = validateData(data, newMappings, specialMappings);
+                                                                setValidationErrors(errors);
+                                                            }
+                                                        }, 0);
+                                                    }}
+                                                />
+                                            </Badge>
+                                        )
+                                    ))}
+                                </div>
+
+
                                 {/* Special mappings */}
                                 {Object.entries(specialMappings).map(([source, specialType]) => {
                                     const config = SPECIAL_MAPPINGS[specialType];

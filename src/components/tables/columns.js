@@ -53,7 +53,7 @@ const SampleSexCell = ({ sample, onStatusChange }) => {
           General columns
  ------------------------------------*/
 
- export const editableColumn = (key, label) => (
+export const editableColumn = (key, label) => (
   {
     accessorKey: key,
     header: ({ column, table }) => (
@@ -67,24 +67,24 @@ const SampleSexCell = ({ sample, onStatusChange }) => {
       const { onStatusChange } = info.table.options.meta;
       // Use a local state to manage the input value
       const [inputValue, setInputValue] = React.useState(dataRow[key]);
-      
+
       // Handle input changes
       const handleChange = (e) => {
         const newValue = e.target.value;
         setInputValue(newValue); // Update local state
-        
+
         // Convert to number if the original value was a number
-        const processedValue = typeof dataRow[key] === 'number' ? 
+        const processedValue = typeof dataRow[key] === 'number' ?
           parseFloat(newValue) || 0 : // Convert to number, default to 0 if NaN
           newValue;                   // Keep as string if original wasn't a number
-        
+
         onStatusChange(dataRow._id, key, processedValue); // Send the correctly typed value
       };
-      
+
       return (
-        <Input 
-          className='flex min-w-24 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none' 
-          value={inputValue} 
+        <Input
+          className='flex min-w-24 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+          value={inputValue}
           onChange={handleChange}
           type={typeof dataRow[key] === 'number' ? 'number' : 'text'} // Use number input for numbers
         />
@@ -95,44 +95,44 @@ const SampleSexCell = ({ sample, onStatusChange }) => {
 
 
 export const logbookColumn = (key, label) => ({
-    accessorKey: 'logbook',
-    header: "Log",
-    cell: ({ row }) => {
-        const logbook = row.original.logbook;
+  accessorKey: 'logbook',
+  header: "Log",
+  cell: ({ row }) => {
+    const logbook = row.original.logbook;
 
-        return (
-            <HoverCard>
-                <HoverCardTrigger asChild>
-                    <ClipboardList className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80">
-                    <ScrollArea className="h-72">
-                        <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">Logbook Entries</h4>
-                            {logbook && logbook.length > 0 ? (
-                                logbook.map(([date, log], index) => (
-                                    <div key={index} className="text-sm">
-                                        <span className="font-medium text-muted-foreground">
-                                            {new Date(date).toLocaleDateString("en-UK", {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: 'numeric',
-                                                minute: 'numeric',
-                                            })}
-                                        </span>
-                                        <span className="ml-2">{log}</span>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">No logbook entries.</p>
-                            )}
-                        </div>
-                    </ScrollArea>
-                </HoverCardContent>
-            </HoverCard>
-        );
-    },
+    return (
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <ClipboardList className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
+        </HoverCardTrigger>
+        <HoverCardContent className="w-80">
+          <ScrollArea className="h-72">
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Logbook Entries</h4>
+              {logbook && logbook.length > 0 ? (
+                logbook.map(([date, log], index) => (
+                  <div key={index} className="text-sm">
+                    <span className="font-medium text-muted-foreground">
+                      {new Date(date).toLocaleDateString("en-UK", {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: 'numeric',
+                      })}
+                    </span>
+                    <span className="ml-2">{log}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No logbook entries.</p>
+              )}
+            </div>
+          </ScrollArea>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  },
 });
 
 export const sortableFilterableColumn = (key, label, filterFn = "includesString") => (
@@ -152,7 +152,7 @@ export const sortableFilterableNumericColumn = (key, label) => ({
   accessorKey: key,
   header: ({ column, table }) => (
     <div>
-      <DataTableColumnHeader column={column} title={label}/>
+      <DataTableColumnHeader column={column} title={label} />
       <Filter column={column} table={table} />
     </div>
   ),
@@ -249,7 +249,7 @@ export const sampleColumn = (fieldId, fieldname, label, to_traits = false) => {
       const row = info.row.original;
       const sampleName = row[fieldname];
       const sampleId = row[fieldId];
-      const url = to_traits ? `/sample/${sampleId}/s_trait` : `/sample/${sampleId}` ;
+      const url = to_traits ? `/sample/${sampleId}/s_trait` : `/sample/${sampleId}`;
       return (
         <div>
           <Link href={url} target="_blank">{sampleName}</Link>
@@ -286,7 +286,7 @@ export const dateColumn = () => (
     accessorKey: "date",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Collection Date" />
-    ),    cell: info => {
+    ), cell: info => {
       const date = new Date(info.row.original.date);
       return date.toLocaleDateString("en-UK", { year: 'numeric', month: 'short', day: 'numeric' });
     },
@@ -507,7 +507,7 @@ export const listToggleColumn = (key, label, possibleValues) => (
       )
     }
   }
-);  
+);
 
 
 export const lifestatusColumn = () => (
@@ -664,12 +664,12 @@ export const imageColumn = (imagefield) => ({
   header: "Image",
   cell: function Cell(info) {
     const rowdata = info.row.original;
-    const base64Data = rowdata[imagefield]; 
-    
+    const base64Data = rowdata[imagefield];
+
     if (base64Data === undefined || base64Data === null) {
       console.warn("base64Data is undefined or null for this row");
       return null;
-    } 
+    }
 
     // Handle different data types
     let imageData;
@@ -695,9 +695,21 @@ const BlobImage = ({ blob }) => {
   const [imageSrc, setImageSrc] = React.useState(null);
 
   React.useEffect(() => {
+    if (!blob) return;
+
     const reader = new FileReader();
     reader.onload = (e) => setImageSrc(e.target.result);
+    reader.onerror = () => console.error("Error reading blob");
     reader.readAsDataURL(blob);
+
+    // Cleanup function to abort FileReader when component unmounts
+    // This prevents memory leaks by ensuring the FileReader is properly aborted
+    // if the component unmounts before the file reading operation completes
+    return () => {
+      if (reader.readyState !== FileReader.DONE) {
+        reader.abort();
+      }
+    };
   }, [blob]);
 
   if (!imageSrc) return null;
@@ -962,7 +974,7 @@ export const fileDownloadColumn = () => ({
     );
   }
 });
-  
+
 
 export const fileUploadColumn = () => ({
   id: 'fileUpload',
@@ -993,7 +1005,7 @@ export const fileUploadColumn = () => ({
 
     return (
       <div className="flex items-center">
-        <Input 
+        <Input
           type="file"
           className="hidden"
           multiple
@@ -1001,7 +1013,7 @@ export const fileUploadColumn = () => ({
           id={`file-upload-${trait._id}`}
         />
         <Label htmlFor={`file-upload-${trait._id}`}>
-          <Button 
+          <Button
             asChild
             size="sm"
             variant="outline"
